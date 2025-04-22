@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Improved Form Submission</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Your existing CSS */
+    .register{
+      display: flex;
+      justify-content: center;
+    }
+    .contactusform{
+      color: #FFF;
+      font-family: Synonym-Variable;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .contact-form-container {
+        border-radius: 2.5px;
+        border: 0.25px solid #FFF;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(7.5px);
+        padding: 30px;
+        display: grid;
+        justify-content: center;
+        align-items: center;
+        width: max-content;
+        height: max-content;
+    }
+    .contact-form-container .form-control {
+        margin-bottom: 15px;
+        border-radius: 0;
+        border: none;
+        padding: 12px 15px;
+    }
+    .contact-form-container textarea.form-control {
+        resize: none;
+    }
+    .form-check-input {
+        background-color: transparent;
+        border: 1px solid #b11714;
+    }
+    .form-check-input:checked {
+        background-color: #b11714;
+        border-color: #b11714;
+    }
+    .form-check-label {
+        color: #fff;
+        font-size: 14px;
+        font-family: "Synonym Variable";
+    }
+    .register-btn {
+        padding: 11px 11px;
+        width: 70%; 
+        background-color: #b11714;
+        color: white;
+        border: none;
+        border-radius: 0;
+        font-family: "Synonym Variable";
+        text-align: center;
+        margin-top: 15px;
+    }
+    .register-btn:hover {
+        background-color: #8e1210;
+        color: white;
+    }
+    .contact-form-heading{
+      color: #FFF;
+      text-align: center;
+      font-family: "Synonym Variable";
+      font-size: 23px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 20px;
+      padding-bottom: 20px;
+    }
+    .invalid-feedback {
+      display: none;
+      color: #FFFFFF;
+      font-size: 13px;
+      margin-top: 5px;
+      padding-left: 5px;
+      font-family: "Synonym Variable";
+      position: relative;
+      background-color: rgba(177, 23, 20, 0.65);
+      border-radius: 2px;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+    }
+    .is-invalid {
+      border: 1px solid rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 0 0 3px #b11714 !important;
+    }
+    .form-check .invalid-feedback {
+      margin-left: 25px;
+      margin-top: 8px;
+    }
+    .invalid-feedback:before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 10px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 5px solid rgba(177, 23, 20, 0.65);
+    }
+    /* Status Message */
+    .submission-message {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    .hidden { display: none; }
+    /* New styles for better status messages */
+    .success-message {
+      color: lightgreen;
+      background-color: rgba(0, 100, 0, 0.2);
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 15px;
+    }
+    .error-message {
+      color: #ff6b6b;
+      background-color: rgba(177, 23, 20, 0.2);
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="contactusform">
+  <div class="row">
+    <form name="contact-form-sheet" method="POST" id="form1">
+        <input type="hidden" name="source" value="form1" />
+      <div class="contact-form-container">
+        <h2 class="contact-form-heading">Get in touch with us. We'll answer your query shortly!</h2>
+        <input type="text" name="Name" class="form-control" placeholder="Enter Your Full Name" required>
+        <input type="email" name="Email" class="form-control" placeholder="Enter Email" required>
+        <input type="tel" name="Phone" class="form-control" placeholder="Enter Mobile Number" required>
+        <select name="Program" class="form-control" required>
+          <option value="BBA">BBA</option>
+          <option value="BCA">BCA</option>
+          <option value="BTECH">B.TECH</option>
+          <option value="LLB">LLB</option>
+          <option value="BA LLB">BA LLB</option>
+          <option value="PHD">PH.D</option>
+        </select>
+        <textarea class="form-control" rows="6" name="Message" placeholder="Your Message" required></textarea>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" required>
+          <label class="form-check-label" for="consent">I agree to receive information regarding my submitted
+            application by signing up on <strong>CPJIMT</strong></label>
+        </div>
+        <div class="register">
+          <input type="hidden" name="page-url" id="page-url" value="">  
+          <button type="submit" class="btn register-btn">Register Now</button>
+        </div>
+        <div id="loading" class="submission-message d-none">
+          Sending...
+        </div>
+        <div id="status" class="submission-message d-none"></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set the script URL - your Apps Script web app URL
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbz07UHcRgHJZy5jAlYGf2b8mordg-M7HHsaMDRFeItKxqn1KWm0jPjZGMrekqPtqH3lMA/exec';
+      const form = document.forms['contact-form-sheet'];
+      const nameField = form.elements['Name'];
+      const emailField = form.elements['Email'];
+      const phoneField = form.elements['Phone'];
+      const programField = form.elements['Program'];
+      const msgField = form.elements['Message'];
+      const pageUrl = form.elements['page-url'];
+      const nameRegex = /^[A-Za-z\s]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^\d{10}$/;
+    
+      // Track submission attempts to avoid duplicates
+      let isSubmitting = false;
+    
+      function addErrorMessage(field, message) {
+        field.classList.add('is-invalid');
+        
+        let errorDiv = field.nextElementSibling;
+        if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+          errorDiv = document.createElement('div');
+          errorDiv.className = 'invalid-feedback';
+          field.parentNode.insertBefore(errorDiv, field.nextSibling);
+        }
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+      }
+    
+      function removeErrorMessage(field) {
+        field.classList.remove('is-invalid');
+        const errorDiv = field.nextElementSibling;
+        if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+          errorDiv.style.display = 'none';
+        }
+      }
+    
+      [nameField, emailField, phoneField, programField, msgField].forEach(el => {
+        if (el) {
+          el.addEventListener('input', () => removeErrorMessage(el));
+        }
+      });
+    
+      // Set the current page URL
+      document.getElementById("page-url").value = window.location.href;
+    
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Prevent double submissions
+        if (isSubmitting) {
+          return;
+        }
+        
+        let valid = true;
+    
+        if (!nameField.value.trim() || !nameRegex.test(nameField.value.trim())) {
+          addErrorMessage(nameField, 'Please enter a valid name (letters and spaces only)');
+          valid = false;
+        }
+        
+        if (!emailRegex.test(emailField.value.trim())) {
+          addErrorMessage(emailField, 'Please enter a valid email address');
+          valid = false;
+        }
+        
+        if (!phoneRegex.test(phoneField.value.trim())) {
+          addErrorMessage(phoneField, 'Please enter a valid 10-digit phone number');
+          valid = false;
+        }
+        
+        if (!programField.value) {
+          addErrorMessage(programField, 'Please select a program');
+          valid = false;
+        }
+        
+        if (!msgField.value.trim()) {
+          addErrorMessage(msgField, 'Please enter your message');
+          valid = false;
+        }
+        if (!valid) {
+          const firstErr = form.querySelector('.is-invalid');
+          if (firstErr) firstErr.focus();
+          return false;
+        }
+    
+        const loading = document.getElementById('loading');
+        const status = document.getElementById('status');
+        const button = form.querySelector('.register-btn');
+        
+        // Show loading indicator
+        loading.classList.remove('hidden');
+        button.disabled = true;
+        isSubmitting = true;
+    
+        // Create form data including the page URL
+        const formData = new FormData(form);
+        
+        // Clear any previous status
+        status.className = 'submission-message';
+        status.textContent = '';
+    
+        // Send the form data
+        fetch(scriptURL, {
+          method: 'POST',
+          body: formData,
+          mode: 'no-cors' // Required for cross-origin requests to Google Apps Script
+        })
+        .then(() => {
+          // With no-cors mode, we can't access response details
+          // So we assume success when no error is thrown
+          status.className = 'submission-message success-message';
+          status.textContent = 'Thanks! Your message has been sent successfully.';
+          form.reset();
+          
+          setTimeout(() => {
+            window.location.href = 'https://www.youtube.com/';
+        }, 1000); // Replace with your desired URL
+        })
+        .catch(err => {
+          status.className = 'submission-message error-message';
+          status.textContent = 'Error submitting the form. Please try again later.';
+          console.error('Submission error:', err);
+        })
+        .finally(() => {
+          loading.classList.add('hidden');
+          button.disabled = false;
+          isSubmitting = false;
+        });
+      });
+    });
+    </script>
+    
+    
+</body>
+</html>
